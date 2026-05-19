@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+fpdf2
+requests
+beautifulsoup4
+groq
+httpx
+google-api-python-client
+google-auth
+python-dotenv
+resend

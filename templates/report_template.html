@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #ffffff;
+      color: #1e293b;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* ── COVER PAGE ────────────────────────────────────────────────────── */
+    .cover {
+      width: 100%;
+      height: 100vh;
+      background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 60px;
+      position: relative;
+      overflow: hidden;
+      page-break-after: always;
+    }
+
+    .cover::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .cover::after {
+      content: '';
+      position: absolute;
+      bottom: -150px;
+      left: -100px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .cover-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cover-logo-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .cover-logo-text {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+
+    .cover-logo-sub {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+
+    .cover-main {
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-badge {
+      display: inline-block;
+      background: rgba(59,130,246,0.2);
+      border: 1px solid rgba(59,130,246,0.4);
+      color: #93c5fd;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+    }
+
+    .cover-title {
+      font-size: 48px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 16px;
+    }
+
+    .cover-title span {
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .cover-subtitle {
+      font-size: 16px;
+      color: #94a3b8;
+      font-weight: 400;
+      max-width: 480px;
+      line-height: 1.6;
+    }
+
+    .cover-meta {
+      display: flex;
+      gap: 40px;
+      margin-top: 48px;
+      padding-top: 40px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .cover-meta-item label {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #475569;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .cover-meta-item span {
+      font-size: 14px;
+      color: #e2e8f0;
+      font-weight: 500;
+    }
+
+    .cover-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-footer p {
+      font-size: 11px;
+      color: #334155;
+    }
+
+    /* ── PAGE LAYOUT ───────────────────────────────────────────────────── */
+    .page {
+      padding: 52px 56px;
+      page-break-after: always;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .page:last-child { page-break-after: auto; }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 36px;
+    }
+
+    .page-header-brand {
+      font-size: 11px;
+      font-weight: 700;
+      color: #3b82f6;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .page-header-company {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .page-footer {
+      position: absolute;
+      bottom: 28px;
+      left: 56px;
+      right: 56px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 16px;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .page-footer p {
+      font-size: 10px;
+      color: #cbd5e1;
+    }
+
+    /* ── SECTION TITLES ────────────────────────────────────────────────── */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #3b82f6;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e2e8f0;
+    }
+
+    .section-heading {
+      font-size: 24px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    /* ── EXECUTIVE SUMMARY ─────────────────────────────────────────────── */
+    .exec-summary {
+      background: linear-gradient(135deg, #f8faff 0%, #eff6ff 100%);
+      border: 1px solid #dbeafe;
+      border-left: 4px solid #3b82f6;
+      border-radius: 0 12px 12px 0;
+      padding: 28px 32px;
+      margin-bottom: 32px;
+    }
+
+    .exec-summary p {
+      font-size: 13.5px;
+      color: #334155;
+      line-height: 1.8;
+      margin-bottom: 12px;
+    }
+
+    .exec-summary p:last-child { margin-bottom: 0; }
+
+    /* ── COMPANY OVERVIEW ──────────────────────────────────────────────── */
+    .overview-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .overview-box p {
+      color: #475569;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    /* ── STATS ROW ─────────────────────────────────────────────────────── */
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .stat-card .stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: #60a5fa;
+      letter-spacing: -0.5px;
+    }
+
+    .stat-card .stat-label {
+      font-size: 10px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* ── INDUSTRY ──────────────────────────────────────────────────────── */
+    .industry-landscape {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .industry-landscape p {
+      color: #475569;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .trends-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .trend-item {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .trend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #3b82f6;
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+
+    .trend-item p {
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    .opportunity-box {
+      background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+
+    .opportunity-box p {
+      font-size: 13px;
+      color: #166534;
+      line-height: 1.7;
+    }
+
+    /* ── CARDS GRID ────────────────────────────────────────────────────── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .cards-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .strength-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-top: 3px solid #10b981;
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .strength-card h4 {
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .strength-card p {
+      font-size: 11.5px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .opportunity-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-top: 3px solid #3b82f6;
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .opportunity-card h4 {
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .opportunity-card p {
+      font-size: 11.5px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .challenge-card {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .challenge-card h4 {
+      font-size: 12px;
+      font-weight: 700;
+      color: #9a3412;
+      margin-bottom: 6px;
+    }
+
+    .challenge-card p {
+      font-size: 11.5px;
+      color: #92400e;
+      line-height: 1.5;
+    }
+
+    /* ── RECOMMENDATIONS ───────────────────────────────────────────────── */
+    .rec-item {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px 22px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .rec-priority {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 100px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .rec-priority.high {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    .rec-priority.medium {
+      background: #fffbeb;
+      color: #d97706;
+      border: 1px solid #fde68a;
+    }
+
+    .rec-body { flex: 1; }
+
+    .rec-body h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .rec-body p {
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.6;
+      margin-bottom: 6px;
+    }
+
+    .rec-impact {
+      font-size: 11px;
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    /* ── CONCLUSION ────────────────────────────────────────────────────── */
+    .conclusion-box {
+      background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 100%);
+      border-radius: 16px;
+      padding: 36px;
+      text-align: center;
+    }
+
+    .conclusion-box h3 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+
+    .conclusion-box p {
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.8;
+      max-width: 520px;
+      margin: 0 auto 24px;
+    }
+
+    .conclusion-badge {
+      display: inline-block;
+      background: rgba(59,130,246,0.2);
+      border: 1px solid rgba(59,130,246,0.3);
+      color: #93c5fd;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 20px;
+      border-radius: 100px;
+    }
+
+    /* ── SOURCES ───────────────────────────────────────────────────────── */
+    .source-item {
+      font-size: 10.5px;
+      color: #94a3b8;
+      padding: 6px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ COVER PAGE ══════════════════════════════════════════════════════ -->
+  <div class="cover">
+    <div class="cover-logo">
+      <div class="cover-logo-icon">⚡</div>
+      <div>
+        <div class="cover-logo-text">LeadPilot</div>
+        <div class="cover-logo-sub">AI Business Intelligence</div>
+      </div>
+    </div>
+
+    <div class="cover-main">
+      <div class="cover-badge">Business Audit Report</div>
+      <div class="cover-title">
+        {{ report.get('company_overview', lead.company)[:30] if report.get('company_overview') else lead.company }}<br/>
+        <span>Intelligence Report</span>
+      </div>
+      <div class="cover-subtitle">
+        A comprehensive AI-powered analysis of {{ lead.company }}'s business model, market positioning, opportunities, and strategic recommendations.
+      </div>
+      <div class="cover-meta">
+        <div class="cover-meta-item">
+          <label>Prepared For</label>
+          <span>{{ lead.name }}</span>
+        </div>
+        <div class="cover-meta-item">
+          <label>Company</label>
+          <span>{{ lead.company }}</span>
+        </div>
+        <div class="cover-meta-item">
+          <label>Industry</label>
+          <span>{{ lead.industry }}</span>
+        </div>
+        <div class="cover-meta-item">
+          <label>Date</label>
+          <span>{{ generated_at }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cover-footer">
+      <p>Confidential · Generated exclusively for {{ lead.company }}</p>
+      <p>© {{ year }} LeadPilot</p>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 2 — EXECUTIVE SUMMARY + OVERVIEW ═══════════════════════════ -->
+  <div class="page">
+    <div class="page-header">
+      <span class="page-header-brand">LeadPilot</span>
+      <span class="page-header-company">{{ lead.company }} · Business Audit</span>
+    </div>
+
+    <div class="section-title">Executive Summary</div>
+    <div class="section-heading">At a Glance</div>
+    <div class="exec-summary">
+      {% for para in report.get('executive_summary', '').split('\n') %}
+        {% if para.strip() %}
+          <p>{{ para.strip() }}</p>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="section-title">Company Overview</div>
+    <div class="overview-box">
+      <p>{{ report.get('company_overview', '') }}</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value">AI</div>
+        <div class="stat-label">Powered Analysis</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ lead.industry[:12] }}</div>
+        <div class="stat-label">Industry Focus</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ generated_at.split(' ')[1] }} {{ generated_at.split(' ')[2] }}</div>
+        <div class="stat-label">Report Date</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">100%</div>
+        <div class="stat-label">Personalized</div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <p>LeadPilot · AI Business Intelligence</p>
+      <p>Page 2</p>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 3 — INDUSTRY ANALYSIS ═════════════════════════════════════ -->
+  <div class="page">
+    <div class="page-header">
+      <span class="page-header-brand">LeadPilot</span>
+      <span class="page-header-company">{{ lead.company }} · Industry Analysis</span>
+    </div>
+
+    <div class="section-title">Industry Analysis</div>
+    <div class="section-heading">Market Landscape & Trends</div>
+
+    <div class="industry-landscape">
+      <p>{{ report.get('industry_analysis', {}).get('current_landscape', '') }}</p>
+    </div>
+
+    <div class="section-title">Key Trends</div>
+    <div class="trends-grid">
+      {% for trend in report.get('industry_analysis', {}).get('key_trends', []) %}
+      <div class="trend-item">
+        <div class="trend-dot"></div>
+        <p>{{ trend }}</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="section-title">Market Opportunity</div>
+    <div class="opportunity-box">
+      <p>{{ report.get('industry_analysis', {}).get('market_opportunity', '') }}</p>
+    </div>
+
+    <div class="page-footer">
+      <p>LeadPilot · AI Business Intelligence</p>
+      <p>Page 3</p>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 4 — STRENGTHS + OPPORTUNITIES + CHALLENGES ════════════════ -->
+  <div class="page">
+    <div class="page-header">
+      <span class="page-header-brand">LeadPilot</span>
+      <span class="page-header-company">{{ lead.company }} · SWOT Analysis</span>
+    </div>
+
+    <div class="section-title">Core Strengths</div>
+    <div class="cards-grid">
+      {% for s in report.get('strengths', []) %}
+      <div class="strength-card">
+        <h4>{{ s.title }}</h4>
+        <p>{{ s.detail }}</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="section-title">Growth Opportunities</div>
+    <div class="cards-grid">
+      {% for o in report.get('opportunities', []) %}
+      <div class="opportunity-card">
+        <h4>{{ o.title }}</h4>
+        <p>{{ o.detail }}</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="section-title">Challenges to Address</div>
+    <div class="cards-grid-2">
+      {% for c in report.get('challenges', []) %}
+      <div class="challenge-card">
+        <h4>{{ c.title }}</h4>
+        <p>{{ c.detail }}</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="page-footer">
+      <p>LeadPilot · AI Business Intelligence</p>
+      <p>Page 4</p>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 5 — RECOMMENDATIONS + CONCLUSION ══════════════════════════ -->
+  <div class="page">
+    <div class="page-header">
+      <span class="page-header-brand">LeadPilot</span>
+      <span class="page-header-company">{{ lead.company }} · Recommendations</span>
+    </div>
+
+    <div class="section-title">Strategic Recommendations</div>
+    <div class="section-heading">Action Plan</div>
+
+    {% for rec in report.get('recommendations', []) %}
+    <div class="rec-item">
+      <div class="rec-priority {{ rec.priority | lower }}">{{ rec.priority }}</div>
+      <div class="rec-body">
+        <h4>{{ rec.title }}</h4>
+        <p>{{ rec.detail }}</p>
+        <div class="rec-impact">→ {{ rec.impact }}</div>
+      </div>
+    </div>
+    {% endfor %}
+
+    <div style="margin-top: 32px;">
+      <div class="section-title">Conclusion</div>
+      <div class="conclusion-box">
+        <h3>Next Steps for {{ lead.company }}</h3>
+        <p>{{ report.get('conclusion', '') }}</p>
+        <div class="conclusion-badge">Generated by LeadPilot · {{ generated_at }}</div>
+      </div>
+    </div>
+
+    {% if report.get('sources') %}
+    <div style="margin-top: 24px;">
+      <div class="section-title">Research Sources</div>
+      {% for source in report.get('sources', [])[:5] %}
+      <div class="source-item">{{ source }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="page-footer">
+      <p>LeadPilot · Confidential Report for {{ lead.company }}</p>
+      <p>Page 5</p>
+    </div>
+  </div>
+
+</body>
+</html>

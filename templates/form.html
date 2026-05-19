@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LeadPilot — AI Business Intelligence</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+
+    body {
+      background: #060c18;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59,130,246,0.15), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(99,102,241,0.08), transparent);
+      min-height: 100vh;
+    }
+
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .glass {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .input-field {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #f1f5f9;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: #3b82f6;
+      background: rgba(59,130,246,0.08);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+    .input-field::placeholder { color: rgba(255,255,255,0.2); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      box-shadow: 0 4px 16px rgba(59,130,246,0.25);
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(59,130,246,0.35);
+    }
+    .btn-primary:active:not(:disabled) { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Animations */
+    .slide-up { animation: slideUp 0.5s ease forwards; }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeIn 0.4s ease forwards; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { animation: spin 0.8s linear infinite; }
+
+    /* Progress bar */
+    .progress-bar { height: 2px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #6366f1); border-radius: 2px; transition: width 0.6s ease; }
+
+    /* Pipeline steps */
+    .pipeline-step { transition: all 0.4s ease; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); }
+    .pipeline-step.state-waiting { opacity: 0.4; }
+    .pipeline-step.state-running { border-color: rgba(59,130,246,0.3); background: rgba(59,130,246,0.06); }
+    .pipeline-step.state-done { border-color: rgba(16,185,129,0.25); background: rgba(16,185,129,0.05); }
+    .pipeline-step.state-error { border-color: rgba(239,68,68,0.25); background: rgba(239,68,68,0.05); }
+
+    .icon-wrap { transition: all 0.4s ease; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .state-waiting .icon-wrap { background: rgba(255,255,255,0.06); }
+    .state-running .icon-wrap { background: rgba(59,130,246,0.15); box-shadow: 0 0 16px rgba(59,130,246,0.25); }
+    .state-done .icon-wrap { background: rgba(16,185,129,0.15); }
+    .state-error .icon-wrap { background: rgba(239,68,68,0.15); }
+    .state-waiting .icon-wrap svg { color: rgba(255,255,255,0.2); }
+    .state-running .icon-wrap svg { color: #60a5fa; }
+    .state-done .icon-wrap svg { color: #34d399; }
+    .state-error .icon-wrap svg { color: #f87171; }
+
+    /* Searchable dropdown */
+    .dropdown-container { position: relative; }
+    .dropdown-menu {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 100;
+      background: #0f172a; border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+      max-height: 200px; overflow-y: auto;
+    }
+    .dropdown-menu::-webkit-scrollbar { width: 4px; }
+    .dropdown-menu::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    .dropdown-option { padding: 9px 14px; font-size: 13px; color: #94a3b8; cursor: pointer; transition: all 0.15s; }
+    .dropdown-option:hover, .dropdown-option.active { background: rgba(59,130,246,0.12); color: #e2e8f0; }
+    .dropdown-search { width: 100%; background: rgba(255,255,255,0.05); border: none; border-bottom: 1px solid rgba(255,255,255,0.08); color: #f1f5f9; font-size: 13px; padding: 10px 14px; outline: none; }
+    .dropdown-search::placeholder { color: rgba(255,255,255,0.2); }
+    .dropdown-trigger {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: #f1f5f9; transition: all 0.2s; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; text-align: left;
+    }
+    .dropdown-trigger.open, .dropdown-trigger:focus {
+      outline: none; border-color: #3b82f6;
+      background: rgba(59,130,246,0.08); box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+    .dropdown-placeholder { color: rgba(255,255,255,0.2); }
+
+    /* Breadcrumbs */
+    .crumb {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 8px; border: 1px solid;
+      font-size: 12px; font-weight: 600; transition: all 0.2s; cursor: pointer;
+    }
+    .crumb.active { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.25); color: #93c5fd; }
+    .crumb.completed { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.2); color: #6ee7b7; cursor: pointer; }
+    .crumb.inactive { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.07); color: #334155; cursor: default; pointer-events: none; }
+
+    /* Action buttons on success */
+    .action-btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 10px 0; border-radius: 10px; font-size: 13px; font-weight: 600;
+      color: #fff; text-decoration: none;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      box-shadow: 0 4px 12px rgba(59,130,246,0.25);
+      transition: all 0.2s;
+    }
+    .action-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(59,130,246,0.35); }
+    .action-btn-secondary {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 10px 0; border-radius: 10px; font-size: 13px; font-weight: 600;
+      color: #cbd5e1; text-decoration: none;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.2s;
+    }
+    .action-btn-secondary:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+    /* Responsive tweaks */
+    @media (max-width: 480px) {
+      .header-title { font-size: 1.6rem !important; }
+      .card-pad { padding: 1.25rem !important; }
+      .grid-2col { grid-template-columns: 1fr !important; }
+      .feature-hints { flex-direction: column; gap: 8px !important; }
+      .action-grid { grid-template-columns: 1fr !important; }
+    }
+  </style>
+</head>
+<body class="grid-bg flex items-center justify-center px-4 py-12">
+<div class="relative z-10 w-full max-w-lg">
+
+  <!-- ── Header ─────────────────────────────────────────────────────── -->
+  <div class="text-center mb-8 slide-up">
+    <div class="inline-flex items-center gap-2.5 mb-4">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+           style="background:linear-gradient(135deg,#3b82f6,#2563eb);">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+      </div>
+      <span class="text-white font-bold text-xl tracking-tight">LeadPilot</span>
+    </div>
+    <h1 class="header-title text-3xl font-bold text-white tracking-tight leading-tight mb-2">
+      Instant Business Intelligence<br/>
+      <span style="background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+        for Your Company
+      </span>
+    </h1>
+    <p class="text-slate-500 text-sm max-w-xs mx-auto leading-relaxed">
+      Submit your details and receive a personalized AI audit report in minutes.
+    </p>
+  </div>
+
+  <!-- ── Form Card ──────────────────────────────────────────────────── -->
+  <div id="formCard" class="glass rounded-2xl slide-up card-pad" style="padding:1.75rem;">
+
+    <!-- Breadcrumbs -->
+    <div class="flex items-center gap-2 mb-6">
+      <button id="crumb1" onclick="navToStep1()" class="crumb active">
+        <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+        Company Details
+      </button>
+      <svg class="w-3 h-3 text-slate-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+      <button id="crumb2" onclick="navToStep2()" class="crumb inactive">
+        <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+        Delivery Details
+      </button>
+    </div>
+
+    <!-- ── STEP 1 ──────────────────────────────────────────────────── -->
+    <div id="step1">
+      <div class="space-y-4">
+
+        <div class="grid grid-cols-2 gap-3 grid-2col">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+              Company Name <span class="text-red-500">*</span>
+            </label>
+            <input id="company" type="text" maxlength="80"
+              placeholder="e.g. Acme Corp"
+              class="input-field rounded-xl px-3.5 py-2.5 text-sm"/>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+              Website <span class="text-red-500">*</span>
+            </label>
+            <input id="website" type="text" maxlength="120"
+              placeholder="https://acme.com"
+              class="input-field rounded-xl px-3.5 py-2.5 text-sm"/>
+          </div>
+        </div>
+
+        <!-- Searchable Industry Dropdown -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+            Industry <span class="text-red-500">*</span>
+          </label>
+          <div class="dropdown-container" id="ddContainer">
+            <button type="button" id="ddTrigger" onclick="toggleDD()"
+              class="dropdown-trigger rounded-xl px-3.5 py-2.5 text-sm">
+              <span id="ddLabel" class="dropdown-placeholder">Select your industry</span>
+              <svg id="ddChevron" class="w-4 h-4 text-slate-500 transition-transform flex-shrink-0"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="ddMenu" class="dropdown-menu hidden">
+              <input id="ddSearch" type="text" class="dropdown-search"
+                placeholder="Type to search..."
+                oninput="filterDD(this.value)"
+                onclick="event.stopPropagation()"/>
+              <div id="ddOptions"></div>
+            </div>
+          </div>
+          <input type="hidden" id="industry" value=""/>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+            Business Description <span class="text-red-500">*</span>
+          </label>
+          <textarea id="description" rows="3" maxlength="600"
+            placeholder="What does your company do? Who are your customers? What products or services do you offer?"
+            class="input-field rounded-xl px-3.5 py-2.5 text-sm resize-none"></textarea>
+          <p id="descCount" class="text-right text-xs text-slate-700 mt-1">0 / 600</p>
+        </div>
+      </div>
+
+      <button onclick="goToStep2()"
+        class="btn-primary w-full mt-5 py-3 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2">
+        Continue
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- ── STEP 2 ──────────────────────────────────────────────────── -->
+    <div id="step2" class="hidden">
+
+      <!-- Company preview pill -->
+      <div class="rounded-xl p-3.5 mb-5"
+        style="background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.15);">
+        <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-0.5">Generating report for</p>
+        <p id="previewCompany" class="text-white font-semibold text-sm"></p>
+        <p id="previewIndustry" class="text-slate-400 text-xs mt-0.5"></p>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+            Your Full Name <span class="text-red-500">*</span>
+          </label>
+          <input id="name" type="text" maxlength="80"
+            placeholder="e.g. Jane Smith"
+            class="input-field rounded-xl px-3.5 py-2.5 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+            Work Email <span class="text-red-500">*</span>
+          </label>
+          <input id="email" type="email" maxlength="120"
+            placeholder="jane@yourcompany.com"
+            class="input-field rounded-xl px-3.5 py-2.5 text-sm"/>
+          <p class="text-slate-600 text-xs mt-1.5 flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            Your personalized PDF report will be sent here.
+          </p>
+        </div>
+      </div>
+
+      <button onclick="submitLead()" id="submitBtn"
+        class="btn-primary w-full mt-5 py-3 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Generate My Report
+      </button>
+    </div>
+  </div>
+
+  <!-- Feature hints -->
+  <div class="feature-hints flex items-center justify-center gap-5 mt-4">
+    <span class="text-xs text-slate-600 flex items-center gap-1.5">
+      <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+      </svg>
+      AI-Powered
+    </span>
+    <span class="text-xs text-slate-600 flex items-center gap-1.5">
+      <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      Delivered in Minutes
+    </span>
+    <span class="text-xs text-slate-600 flex items-center gap-1.5">
+      <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+      </svg>
+      Confidential
+    </span>
+  </div>
+
+  <!-- ── Pipeline Card ──────────────────────────────────────────────── -->
+  <div id="pipelineCard" class="hidden glass rounded-2xl slide-up card-pad" style="padding:1.75rem;">
+
+    <!-- Progress header -->
+    <div class="mb-5">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-white font-semibold text-base">Processing Your Request</h2>
+        <span id="progressLabel" class="text-xs text-slate-500 font-medium tabular-nums">0 of 5</span>
+      </div>
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Steps -->
+    <div class="space-y-2" id="stepsContainer">
+
+      <div id="step-validate" class="pipeline-step state-waiting rounded-xl p-3.5 flex items-center gap-3">
+        <div class="icon-wrap">
+          <svg class="w-[17px] h-[17px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-white text-sm font-medium">Lead Validation</p>
+          <p class="step-msg text-slate-600 text-xs mt-0.5 truncate">Verifying submitted information</p>
+        </div>
+        <div class="step-badge flex-shrink-0 w-5 flex items-center justify-center"></div>
+      </div>
+
+      <div id="step-enrich" class="pipeline-step state-waiting rounded-xl p-3.5 flex items-center gap-3">
+        <div class="icon-wrap">
+          <svg class="w-[17px] h-[17px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-white text-sm font-medium">Company Research</p>
+          <p class="step-msg text-slate-600 text-xs mt-0.5 truncate">Gathering data from public sources</p>
+        </div>
+        <div class="step-badge flex-shrink-0 w-5 flex items-center justify-center"></div>
+      </div>
+
+      <div id="step-report" class="pipeline-step state-waiting rounded-xl p-3.5 flex items-center gap-3">
+        <div class="icon-wrap">
+          <svg class="w-[17px] h-[17px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-white text-sm font-medium">AI Report Generation</p>
+          <p class="step-msg text-slate-600 text-xs mt-0.5 truncate">Analyzing and writing your report</p>
+        </div>
+        <div class="step-badge flex-shrink-0 w-5 flex items-center justify-center"></div>
+      </div>
+
+      <div id="step-pdf" class="pipeline-step state-waiting rounded-xl p-3.5 flex items-center gap-3">
+        <div class="icon-wrap">
+          <svg class="w-[17px] h-[17px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-white text-sm font-medium">PDF Compilation</p>
+          <p class="step-msg text-slate-600 text-xs mt-0.5 truncate">Formatting your audit document</p>
+        </div>
+        <div class="step-badge flex-shrink-0 w-5 flex items-center justify-center"></div>
+      </div>
+
+      <div id="step-email" class="pipeline-step state-waiting rounded-xl p-3.5 flex items-center gap-3">
+        <div class="icon-wrap">
+          <svg class="w-[17px] h-[17px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-white text-sm font-medium">Report Delivery</p>
+          <p class="step-msg text-slate-600 text-xs mt-0.5 truncate">Sending to your inbox</p>
+        </div>
+        <div class="step-badge flex-shrink-0 w-5 flex items-center justify-center"></div>
+      </div>
+
+    </div>
+
+    <!-- ── Success Banner ──────────────────────────────────────────── -->
+    <div id="completeBanner" class="hidden mt-4 rounded-xl p-4 fade-in"
+      style="background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+          style="background:rgba(16,185,129,0.15);">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-emerald-400 font-semibold text-sm">Report Delivered Successfully</p>
+          <p id="completeEmail" class="text-slate-500 text-xs mt-0.5"></p>
+        </div>
+      </div>
+
+      <!-- Download + View buttons -->
+      <div class="grid grid-cols-2 gap-2 mb-2 action-grid">
+        <a id="downloadBtn" href="#" download
+          class="action-btn-primary">
+          <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Download PDF
+        </a>
+        <a id="viewBtn" href="#" target="_blank" rel="noopener noreferrer"
+          class="action-btn-secondary">
+          <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+          View Online
+        </a>
+      </div>
+
+      <button onclick="resetAll()"
+        class="w-full py-2 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-300 transition-colors"
+        style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);">
+        Analyze Another Company
+      </button>
+    </div>
+
+    <!-- ── Error Banner ────────────────────────────────────────────── -->
+    <div id="errorBanner" class="hidden mt-4 rounded-xl p-4 text-center fade-in"
+      style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2"
+        style="background:rgba(239,68,68,0.12);">
+        <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <p class="text-red-400 font-semibold text-sm">Something went wrong</p>
+      <p id="errorMsg" class="text-slate-500 text-xs mt-1 leading-relaxed"></p>
+      <button onclick="resetAll()"
+        class="mt-3 px-5 py-2 rounded-lg text-xs font-semibold text-slate-300 transition-all"
+        style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);">
+        Try Again
+      </button>
+    </div>
+
+  </div>
+
+  <p class="text-center text-slate-700 text-xs mt-5">
+    LeadPilot · AI Business Intelligence · All reports are confidential
+  </p>
+
+</div>
+
+<script>
+// ── Industry data ───────────────────────────────────────────────────────────
+const INDUSTRIES = [
+  'SaaS / Software','Finance & Fintech','Healthcare','E-Commerce & Retail',
+  'Consulting & Professional Services','Real Estate','Education & EdTech',
+  'Manufacturing','Marketing & Advertising','Logistics & Supply Chain',
+  'Media & Entertainment','Food & Beverage','Travel & Hospitality','Other'
+];
+
+let selectedIndustry = '';
+let ddOpen = false;
+let step1Done = false;
+let completedSteps = 0;
+
+// ── Description character counter ──────────────────────────────────────────
+document.getElementById('description').addEventListener('input', function() {
+  document.getElementById('descCount').textContent = `${this.value.length} / 600`;
+});
+
+// ── Searchable Dropdown ─────────────────────────────────────────────────────
+function renderDDOptions(filter = '') {
+  const list = INDUSTRIES.filter(i => i.toLowerCase().includes(filter.toLowerCase()));
+  document.getElementById('ddOptions').innerHTML = list.length
+    ? list.map(i => `<div class="dropdown-option ${i===selectedIndustry?'active':''}" onclick="pickIndustry('${i}')">${i}</div>`).join('')
+    : `<div class="dropdown-option" style="color:#475569;cursor:default;">No results</div>`;
+}
+
+function toggleDD() {
+  ddOpen = !ddOpen;
+  document.getElementById('ddMenu').classList.toggle('hidden', !ddOpen);
+  document.getElementById('ddTrigger').classList.toggle('open', ddOpen);
+  document.getElementById('ddChevron').style.transform = ddOpen ? 'rotate(180deg)' : '';
+  if (ddOpen) { renderDDOptions(); document.getElementById('ddSearch').focus(); }
+}
+
+function closeDD() {
+  ddOpen = false;
+  document.getElementById('ddMenu').classList.add('hidden');
+  document.getElementById('ddTrigger').classList.remove('open');
+  document.getElementById('ddChevron').style.transform = '';
+}
+
+function pickIndustry(val) {
+  selectedIndustry = val;
+  document.getElementById('industry').value = val;
+  const lbl = document.getElementById('ddLabel');
+  lbl.textContent = val;
+  lbl.classList.remove('dropdown-placeholder');
+  document.getElementById('ddSearch').value = '';
+  closeDD();
+}
+
+function filterDD(val) { renderDDOptions(val); }
+
+document.addEventListener('click', e => {
+  if (!document.getElementById('ddContainer').contains(e.target)) closeDD();
+});
+
+// ── Breadcrumb navigation ───────────────────────────────────────────────────
+function setCrumbs(step) {
+  if (step === 1) {
+    document.getElementById('crumb1').className = 'crumb active';
+    document.getElementById('crumb2').className = step1Done ? 'crumb inactive' : 'crumb inactive';
+  } else {
+    document.getElementById('crumb1').className = 'crumb completed';
+    document.getElementById('crumb2').className = 'crumb active';
+  }
+}
+
+function navToStep1() {
+  document.getElementById('step1').classList.remove('hidden');
+  document.getElementById('step2').classList.add('hidden');
+  setCrumbs(1);
+}
+
+function navToStep2() {
+  if (!step1Done) return;
+  document.getElementById('step1').classList.add('hidden');
+  document.getElementById('step2').classList.remove('hidden');
+  setCrumbs(2);
+}
+
+// ── Step 1 validation & advance ─────────────────────────────────────────────
+function goToStep2() {
+  const company = document.getElementById('company').value.trim();
+  const website = document.getElementById('website').value.trim();
+  const industry = document.getElementById('industry').value;
+  const description = document.getElementById('description').value.trim();
+
+  if (!company) { highlight('company', 'Please enter your company name.'); return; }
+  if (!website) { highlight('website', 'Please enter your company website.'); return; }
+  if (!industry) { alert('Please select an industry.'); return; }
+  if (description.length < 20) { highlight('description', 'Please add a brief description (at least 20 characters).'); return; }
+
+  step1Done = true;
+  document.getElementById('previewCompany').textContent = company;
+  document.getElementById('previewIndustry').textContent = industry;
+  navToStep2();
+}
+
+function highlight(id, msg) {
+  const el = document.getElementById(id);
+  el.style.borderColor = '#ef4444';
+  el.focus();
+  setTimeout(() => { el.style.borderColor = ''; }, 2500);
+  alert(msg);
+}
+
+// ── Submit ──────────────────────────────────────────────────────────────────
+async function submitLead() {
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+
+  if (!name) { highlight('name', 'Please enter your full name.'); return; }
+  if (!email || !email.includes('@')) { highlight('email', 'Please enter a valid email address.'); return; }
+
+  document.getElementById('submitBtn').disabled = true;
+
+  const lead = {
+    name, email,
+    company: document.getElementById('company').value.trim(),
+    website: document.getElementById('website').value.trim(),
+    industry: document.getElementById('industry').value,
+    description: document.getElementById('description').value.trim()
+  };
+
+  document.getElementById('formCard').classList.add('hidden');
+  document.getElementById('pipelineCard').classList.remove('hidden');
+
+  try {
+    const res = await fetch('/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(lead)
+    });
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      decoder.decode(value).split('\n')
+        .filter(l => l.startsWith('data:'))
+        .forEach(line => {
+          try { handleEvent(JSON.parse(line.slice(5)), lead.email); } catch {}
+        });
+    }
+  } catch {
+    document.getElementById('errorBanner').classList.remove('hidden');
+    document.getElementById('errorMsg').textContent = 'Connection error. Please check your internet and try again.';
+  }
+}
+
+// ── SSE event handler ───────────────────────────────────────────────────────
+function handleEvent({ step, status, message, pdf_filename }, email) {
+  if (step === 'complete') {
+    document.getElementById('progressFill').style.width = '100%';
+    document.getElementById('progressLabel').textContent = '5 of 5';
+    document.getElementById('completeEmail').textContent = `Sent to ${email}`;
+    if (pdf_filename) {
+      // Download button — forces download
+      const dlBtn = document.getElementById('downloadBtn');
+      dlBtn.href = `/reports/${pdf_filename}`;
+      dlBtn.setAttribute('download', pdf_filename);
+
+      // View button — opens inline in new tab (no download attribute)
+      const viewBtn = document.getElementById('viewBtn');
+      viewBtn.href = `/reports/${pdf_filename}`;
+      viewBtn.removeAttribute('download');
+    }
+    document.getElementById('completeBanner').classList.remove('hidden');
+    return;
+  }
+
+  if (step === 'error') {
+    document.getElementById('errorBanner').classList.remove('hidden');
+    document.getElementById('errorMsg').textContent = message;
+    return;
+  }
+
+  const el = document.getElementById(`step-${step}`);
+  if (!el) return;
+
+  el.classList.remove('state-waiting','state-running','state-done','state-error');
+  const msgEl = el.querySelector('.step-msg');
+  const badgeEl = el.querySelector('.step-badge');
+
+  if (status === 'running') {
+    el.classList.add('state-running');
+    msgEl.innerHTML = `<span class="text-blue-400">${message}</span>`;
+    badgeEl.innerHTML = `
+      <svg class="spinner w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+      </svg>`;
+  } else if (status === 'done') {
+    el.classList.add('state-done');
+    msgEl.innerHTML = `<span class="text-emerald-400">${message}</span>`;
+    badgeEl.innerHTML = `
+      <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+      </svg>`;
+    completedSteps++;
+    document.getElementById('progressFill').style.width = `${completedSteps/5*100}%`;
+    document.getElementById('progressLabel').textContent = `${completedSteps} of 5`;
+  } else if (status === 'error') {
+    el.classList.add('state-error');
+    msgEl.innerHTML = `<span class="text-red-400">${message}</span>`;
+    badgeEl.innerHTML = `
+      <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>`;
+  }
+}
+
+// ── Clean slate reset ───────────────────────────────────────────────────────
+function resetAll() {
+  // Clear all inputs
+  ['company','website','description','name','email'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('industry').value = '';
+  document.getElementById('descCount').textContent = '0 / 600';
+
+  // Reset dropdown
+  selectedIndustry = '';
+  const lbl = document.getElementById('ddLabel');
+  lbl.textContent = 'Select your industry';
+  lbl.classList.add('dropdown-placeholder');
+
+  // Reset steps state
+  completedSteps = 0;
+  step1Done = false;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressLabel').textContent = '0 of 5';
+
+  ['validate','enrich','report','pdf','email'].forEach(id => {
+    const el = document.getElementById(`step-${id}`);
+    el.classList.remove('state-running','state-done','state-error');
+    el.classList.add('state-waiting');
+    el.querySelector('.step-msg').className = 'step-msg text-slate-600 text-xs mt-0.5 truncate';
+    el.querySelector('.step-badge').innerHTML = '';
+  });
+
+  // Reset default messages
+  document.getElementById('step-validate').querySelector('.step-msg').textContent = 'Verifying submitted information';
+  document.getElementById('step-enrich').querySelector('.step-msg').textContent = 'Gathering data from public sources';
+  document.getElementById('step-report').querySelector('.step-msg').textContent = 'Analyzing and writing your report';
+  document.getElementById('step-pdf').querySelector('.step-msg').textContent = 'Formatting your audit document';
+  document.getElementById('step-email').querySelector('.step-msg').textContent = 'Sending to your inbox';
+
+  // Hide banners
+  document.getElementById('completeBanner').classList.add('hidden');
+  document.getElementById('errorBanner').classList.add('hidden');
+
+  // Reset download/view buttons
+  document.getElementById('downloadBtn').href = '#';
+  document.getElementById('viewBtn').href = '#';
+
+  // Show form, hide pipeline
+  document.getElementById('pipelineCard').classList.add('hidden');
+  document.getElementById('formCard').classList.remove('hidden');
+
+  // Reset to step 1
+  document.getElementById('step1').classList.remove('hidden');
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('submitBtn').disabled = false;
+  setCrumbs(1);
+}
+</script>
+</body>
+</html>
